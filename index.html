@@ -1,3 +1,32 @@
+Of course. Here is the full, complete, and updated index.html file.
+
+It includes the structure for all the screens and features we've discussed:
+
+The welcome screen.
+
+The main menu screen with vocabulary selection, custom word pasting, theme selection, and the "Words to Practice" area.
+
+The session setup screen.
+
+The assessment screen with new "Skip" and "Main Menu" buttons.
+
+The training screen with icon-based "Reveal" and "Next" buttons for mobile users.
+
+The results screen.
+
+The draggable settings modal with a dedicated header area.
+
+The side panel with updated horizontal sliders.
+
+Just copy and paste this code into your index.html file.
+
+index.html
+code
+Html
+play_circle
+download
+content_copy
+expand_less
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +39,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="script.js" defer></script>
 </head>
-<body>
+<body class="theme-default"> <!-- Default theme class is applied to the body -->
 
     <!-- Main App Container -->
     <main id="app-container">
@@ -30,7 +59,7 @@
             </footer>
         </section>
 
-        <!-- Screen 2: Word List Setup -->
+        <!-- Screen 2: Word List Setup & Main Menu -->
         <section id="setup-words-screen" class="card hidden">
             <header><h2>Choose Your Vocabulary</h2></header>
             <div class="content setup-options">
@@ -44,6 +73,25 @@
                 </label>
                 <button id="paste-words-toggle-btn" class="secondary-button">Paste a Custom Word List</button>
                 <textarea id="custom-words-paste-area" class="hidden" placeholder="Paste your words here, one per line..."></textarea>
+            </div>
+             <!-- Words to Practice Section - Initially Hidden -->
+            <div id="practice-section" class="hidden">
+                <hr>
+                <h3>Words to Practice</h3>
+                <div id="practice-word-list"></div>
+                <button id="start-practice-btn" class="cta-button">Practice These Words</button>
+            </div>
+            <!-- Theme Selector -->
+            <div id="theme-selector">
+                <hr>
+                <h3>Choose a Theme</h3>
+                <div class="theme-buttons">
+                    <button class="theme-button" data-theme="default" title="Default"></button>
+                    <button class="theme-button" data-theme="classy" title="Classy"></button>
+                    <button class="theme-button" data-theme="mono" title="Monochrome"></button>
+                    <button class="theme-button" data-theme="warm" title="Warm"></button>
+                    <button class="theme-button" data-theme="cool" title="Cool"></button>
+                </div>
             </div>
             <footer><button class="cta-button" data-target="setup-start-screen">Continue</button></footer>
         </section>
@@ -92,10 +140,14 @@
                 <button class="rating-button" data-rating="3">3 (Pretty Sure)</button>
                 <button class="rating-button" data-rating="4">4 (I Know It)</button>
             </div>
-            <div id="assessment-progress">
+             <div id="assessment-progress">
                 <p>Word <span id="assessment-word-count">1</span> of 70</p>
                 <div class="progress-bar-container"><div id="assessment-progress-bar" class="progress-bar-inner"></div></div>
             </div>
+            <footer class="assessment-footer">
+                <button id="skip-assessment-btn" class="secondary-button">Skip</button>
+                <button id="menu-assessment-btn" class="secondary-button">Main Menu</button>
+            </footer>
         </section>
 
         <!-- Screen 5: Training Mode -->
@@ -105,6 +157,10 @@
                     <h1 id="training-word" class="hidden">Word</h1>
                     <p id="training-definition" class="hidden">Definition will appear here.</p>
                 </div>
+            </div>
+            <div id="training-controls">
+                <button id="reveal-btn" class="icon-button" title="Reveal (Spacebar)">👁️</button>
+                <button id="next-btn" class="icon-button" title="Next (Spacebar)">→</button>
             </div>
             <div id="training-progress-container">
                 <span id="training-progress-text">1 / 100</span>
@@ -136,10 +192,10 @@
     <aside id="side-panel" class="hidden">
         <div class="panel-section">
             <label>Difficulty: <span id="side-panel-difficulty-value">50</span>%</label>
-            <div class="vertical-slider-container">
-                <span>🧠</span>
-                <input type="range" id="side-panel-difficulty-slider" min="0" max="100" value="50">
+            <div class="slider-container">
                 <span>👶</span>
+                <input type="range" id="side-panel-difficulty-slider" min="0" max="100" value="50">
+                <span>🧠</span>
             </div>
         </div>
         <div class="panel-section">
@@ -161,11 +217,13 @@
 
     <button id="settings-btn">🇬🇧</button>
 
-    <!-- Hidden Settings Modal -->
+    <!-- Hidden Draggable Settings Modal -->
     <div id="settings-modal" class="modal-container hidden">
-        <div class="modal-content card">
-            <span id="close-modal-btn" class="close-button">&times;</span>
-            <h2>Settings</h2>
+        <div id="settings-modal-content" class="modal-content card">
+            <div id="modal-header">
+                <h2>Settings</h2>
+                <span id="close-modal-btn" class="close-button">&times;</span>
+            </div>
             <div class="setting-item">
                 <label for="round-length-input">Words per Round</label>
                 <input type="number" id="round-length-input" value="100" min="10" max="200" step="10">
