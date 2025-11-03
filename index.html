@@ -45,13 +45,23 @@
                 <button id="paste-words-toggle-btn" class="secondary-button">Paste a Custom Word List</button>
                 <textarea id="custom-words-paste-area" class="hidden" placeholder="Paste your words here, one per line..."></textarea>
             </div>
-             <!-- Words to Practice Section - Initially Hidden -->
+            
+            <!-- NEW: Saved Words Section -->
+            <div id="saved-section" class="hidden">
+                <hr>
+                <h3>⭐ Saved Words</h3>
+                <div id="saved-word-list"></div>
+                <button id="start-saved-btn" class="cta-button">Practice Saved Words</button>
+            </div>
+
+            <!-- Words to Practice Section -->
             <div id="practice-section" class="hidden">
                 <hr>
                 <h3>Words to Practice</h3>
                 <div id="practice-word-list"></div>
                 <button id="start-practice-btn" class="cta-button">Practice These Words</button>
             </div>
+
             <!-- Theme Selector -->
             <div id="theme-selector">
                 <hr>
@@ -125,12 +135,16 @@
         <section id="training-screen" class="card-large hidden">
             <div id="training-main-content">
                 <div id="word-display-area">
-                    <h1 id="training-word" class="hidden">Word</h1>
+                    <h1 id="training-word" class="hidden">
+                        <span id="star-icon" class="hidden">⭐</span>
+                        <span id="word-text">Word</span>
+                    </h1>
                     <p id="training-definition" class="hidden">Definition will appear here.</p>
                 </div>
             </div>
             <div id="training-controls">
-                <button id="reveal-btn" class="icon-button" title="Reveal (Spacebar)">👁️</button>
+                <button id="back-btn" class="icon-button" title="Back">←</button>
+                <button id="reveal-btn" class="icon-button" title="Reveal/Hide (Spacebar)">👁️</button>
                 <button id="next-btn" class="icon-button" title="Next (Spacebar)">→</button>
             </div>
             <div id="training-progress-container">

@@ -1,27 +1,3 @@
-Of course. Here is the complete and updated style.css file.
-
-This stylesheet includes all the previous styles plus the new additions:
-
-Color Themes: All five themes (default, classy, mono, warm, cool) are defined using CSS variables.
-
-New Buttons: Styles for the mobile-friendly icon buttons (#reveal-btn, #next-btn) and the assessment footer buttons.
-
-Clickable Word: A cursor: pointer style for the main training word.
-
-"Words to Practice" Section: Styles for the list of words in the main menu, including a hover effect and a way to show/hide the definition.
-
-Draggable Modal: A cursor: grab style for the modal header to indicate it can be moved.
-
-Horizontal Sliders: The sliders in the side panel are now horizontal.
-
-Copy and paste this entire block of code into your style.css file.
-
-style.css
-code
-CSS
-download
-content_copy
-expand_less
 /* --- Global Setup & Variables --- */
 :root {
     --font-family: 'Poppins', sans-serif;
@@ -59,8 +35,8 @@ body.theme-classy {
     --accent-color: #d4af37; /* Gold */
     --text-color: #e0e0e0;
     --card-bg-color: rgba(10, 10, 10, 0.7);
-    --correct-color: #a4c639; /* Android Green */
-    --incorrect-color: #b22222; /* Firebrick */
+    --correct-color: #a4c639;
+    --incorrect-color: #b22222;
 }
 body.theme-mono {
     --gradient-start: #333;
@@ -70,6 +46,7 @@ body.theme-mono {
     --card-bg-color: rgba(0, 0, 0, 0.7);
     --correct-color: #fff;
     --incorrect-color: #888;
+    --bg-color-dark: #111; /* Added for hover effect */
 }
 body.theme-warm {
     --gradient-start: #ff7e5f;
@@ -77,8 +54,8 @@ body.theme-warm {
     --accent-color: #8B4513; /* SaddleBrown */
     --text-color: #3d2c21;
     --card-bg-color: rgba(255, 255, 255, 0.5);
-    --correct-color: #228B22; /* ForestGreen */
-    --incorrect-color: #dc143c; /* Crimson */
+    --correct-color: #228B22;
+    --incorrect-color: #dc143c;
 }
 body.theme-cool {
     --gradient-start: #00416a;
@@ -86,8 +63,8 @@ body.theme-cool {
     --accent-color: #e1eec3;
     --text-color: #f0f8ff;
     --card-bg-color: rgba(0, 20, 40, 0.6);
-    --correct-color: #76ff03; /* Light Green */
-    --incorrect-color: #ff5252; /* Light Red */
+    --correct-color: #76ff03;
+    --incorrect-color: #ff5252;
 }
 
 
@@ -283,7 +260,21 @@ input[type="range"]::-webkit-slider-thumb {
 #training-word {
     font-size: 4em;
     margin-bottom: 20px;
-    cursor: pointer; /* New: Clickable word for reveal */
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+#star-icon {
+    position: absolute;
+    top: -0.2em;
+    left: -0.8em;
+    font-size: 0.5em;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#star-icon:not(.hidden) {
+    opacity: 1;
+    transform: scale(1.5);
 }
 #training-definition {
     font-size: 1.4em;
@@ -297,6 +288,7 @@ input[type="range"]::-webkit-slider-thumb {
 #training-controls {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 20px;
     margin-top: 20px;
 }
@@ -312,11 +304,19 @@ input[type="range"]::-webkit-slider-thumb {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s, border 0.2s;
 }
 .icon-button:hover {
     transform: scale(1.1);
     box-shadow: 0 0 15px var(--accent-color);
+}
+body.theme-mono .icon-button {
+    background: transparent;
+    border: 2px solid var(--text-color);
+}
+body.theme-mono .icon-button:hover {
+    background: var(--text-color);
+    color: var(--bg-color-dark);
 }
 
 /* Assessment Footer */
@@ -453,7 +453,7 @@ input[type="range"]::-webkit-slider-thumb {
     cursor: grabbing;
 }
 .close-button {
-    position: static; /* No longer absolute */
+    position: static;
     font-size: 1.5em;
     cursor: pointer;
 }
@@ -498,12 +498,12 @@ input[type="range"]::-webkit-slider-thumb {
 .theme-button[data-theme="warm"] { background: linear-gradient(45deg, #ff7e5f, #feb47b); }
 .theme-button[data-theme="cool"] { background: linear-gradient(45deg, #00416a, #799f0c); }
 
-/* --- Words to Practice Section --- */
-#practice-section {
+/* --- Words to Practice & Saved Words Sections --- */
+#practice-section, #saved-section {
     text-align: left;
     margin-top: 20px;
 }
-#practice-word-list {
+#practice-word-list, #saved-word-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -512,7 +512,7 @@ input[type="range"]::-webkit-slider-thumb {
     overflow-y: auto;
     justify-content: center;
 }
-.practice-word {
+.practice-word, .saved-word {
     background: rgba(255,255,255,0.1);
     padding: 5px 10px;
     border-radius: 5px;
@@ -520,18 +520,18 @@ input[type="range"]::-webkit-slider-thumb {
     transition: background-color 0.2s;
     user-select: none;
 }
-.practice-word:hover {
+.practice-word:hover, .saved-word:hover {
     background: rgba(255,255,255,0.2);
 }
-.practice-word .def {
+.practice-word .def, .saved-word .def {
     display: none;
     font-size: 0.9em;
     opacity: 0.8;
     margin-left: 8px;
 }
-.practice-word.show-def {
+.practice-word.show-def, .saved-word.show-def {
     background-color: var(--gradient-end);
 }
-.practice-word.show-def .def {
+.practice-word.show-def .def, .saved-word.show-def .def {
     display: inline;
 }
