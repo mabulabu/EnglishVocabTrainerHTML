@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Vocab Trainer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- Main App Container -->
+    <main id="app-container">
+
+        <!-- Screen 1: Welcome -->
+        <section id="welcome-screen" class="card active">
+            <header>
+                <h1>Welcome to Your Personal Vocab Trainer</h1>
+                <p class="subtitle">Master essential English vocabulary with a smart, gamified learning system.</p>
+            </header>
+            <div class="content">
+                <h2>How It Works</h2>
+                <p>This app uses Spaced Repetition to help you learn words efficiently. Master the 2,800 most important words in just **15 minutes a day** over the next 9-10 months.</p>
+            </div>
+            <footer>
+                <button class="cta-button" data-target="setup-words-screen">Let's Get Started</button>
+            </footer>
+        </section>
+
+        <!-- Screen 2: Word List Setup -->
+        <section id="setup-words-screen" class="card hidden">
+            <header><h2>Choose Your Vocabulary</h2></header>
+            <div class="content setup-options">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="use-general-vocab" checked> General Vocabulary (2,800 words)
+                    <span class="checkmark"></span>
+                </label>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="use-academic-vocab"> Academic Vocabulary (960 words)
+                    <span class="checkmark"></span>
+                </label>
+                <button id="paste-words-toggle-btn" class="secondary-button">Paste a Custom Word List</button>
+                <textarea id="custom-words-paste-area" class="hidden" placeholder="Paste your words here, one per line..."></textarea>
+            </div>
+            <footer><button class="cta-button" data-target="setup-start-screen">Continue</button></footer>
+        </section>
+
+        <!-- Screen 3: Start & Session Settings -->
+        <section id="setup-start-screen" class="card hidden">
+            <header><h2>How Would You Like to Begin?</h2></header>
+            <div class="content setup-options">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="do-assessment"> Test my current level first
+                    <span class="checkmark"></span>
+                </label>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="select-difficulty-manual"> Let me choose my difficulty
+                    <span class="checkmark"></span>
+                </label>
+                <div id="difficulty-slider-container" class="hidden">
+                    <label for="manual-difficulty-slider">Difficulty Level: <span id="manual-difficulty-value">50</span>%</label>
+                    <input type="range" id="manual-difficulty-slider" min="0" max="100" value="50">
+                </div>
+                <hr>
+                <h3>Session Settings</h3>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="remember-session"> Remember progress for next time
+                    <span class="checkmark"></span>
+                </label>
+                 <label for="auto-remove-select">Auto-remove words after:</label>
+                <select id="auto-remove-select">
+                    <option value="1">1 Correct Guess</option>
+                    <option value="2" selected>2 Correct Guesses</option>
+                    <option value="3">3 Correct Guesses</option>
+                </select>
+            </div>
+            <footer><button id="start-session-btn" class="cta-button">Start Session</button></footer>
+        </section>
+
+        <!-- Screen 4: Assessment Mode -->
+        <section id="assessment-screen" class="card hidden">
+            <div id="assessment-word-container">
+                <h2 id="assessment-word">Word</h2>
+                <p>How well do you know this word?</p>
+            </div>
+            <div id="assessment-controls">
+                <button class="rating-button" data-rating="1">1 (No Idea)</button>
+                <button class="rating-button" data-rating="2">2 (Vague Idea)</button>
+                <button class="rating-button" data-rating="3">3 (Pretty Sure)</button>
+                <button class="rating-button" data-rating="4">4 (I Know It)</button>
+            </div>
+            <div id="assessment-progress">
+                <p>Word <span id="assessment-word-count">1</span> of 70</p>
+                <div class="progress-bar-container"><div id="assessment-progress-bar" class="progress-bar-inner"></div></div>
+            </div>
+        </section>
+
+        <!-- Screen 5: Training Mode -->
+        <section id="training-screen" class="card-large hidden">
+            <div id="training-main-content">
+                <div id="word-display-area">
+                    <h1 id="training-word" class="hidden">Word</h1>
+                    <p id="training-definition" class="hidden">Definition will appear here.</p>
+                </div>
+            </div>
+            <div id="training-progress-container">
+                <span id="training-progress-text">1 / 100</span>
+                <div class="progress-bar-container"><div id="training-progress-bar" class="progress-bar-inner"></div></div>
+            </div>
+        </section>
+
+        <!-- Screen 6: Results -->
+        <section id="results-screen" class="card-large hidden">
+            <header>
+                <h2 id="results-title">Round Complete!</h2>
+                <p id="results-summary">Here's how you did.</p>
+            </header>
+            <div id="results-chart-container">
+                <!-- Graphical chart will be generated here by JS -->
+            </div>
+            <div id="results-word-list">
+                <!-- Correct and incorrect words will be listed here by JS -->
+            </div>
+            <footer>
+                <button id="copy-wrong-words-btn" class="secondary-button">Copy Wrong Words</button>
+                <button id="play-again-btn" class="cta-button">Play Again</button>
+            </footer>
+        </section>
+
+    </main>
+    
+    <!-- Persistent UI Elements -->
+    <aside id="side-panel" class="hidden">
+        <div class="panel-section">
+            <label>Difficulty: <span id="side-panel-difficulty-value">50</span>%</label>
+            <div class="vertical-slider-container">
+                <span>🧠</span>
+                <input type="range" id="side-panel-difficulty-slider" min="0" max="100" value="50">
+                <span>👶</span>
+            </div>
+        </div>
+        <div class="panel-section">
+            <label>Word Lists</label>
+            <label class="checkbox-container-small">
+                <input type="checkbox" id="side-panel-general-vocab" class="dataset-toggle"> General
+                <span class="checkmark"></span>
+            </label>
+            <label class="checkbox-container-small">
+                <input type="checkbox" id="side-panel-academic-vocab" class="dataset-toggle"> Academic
+                <span class="checkmark"></span>
+            </label>
+        </div>
+        <div class="panel-section">
+            <button id="restart-round-btn">Restart Round</button>
+            <button id="finish-early-btn">Finish Early</button>
+        </div>
+    </aside>
+
+    <button id="settings-btn">🇬🇧</button>
+
+    <!-- Hidden Settings Modal -->
+    <div id="settings-modal" class="modal-container hidden">
+        <div class="modal-content card">
+            <span id="close-modal-btn" class="close-button">&times;</span>
+            <h2>Settings</h2>
+            <div class="setting-item">
+                <label for="round-length-input">Words per Round</label>
+                <input type="number" id="round-length-input" value="100" min="10" max="200" step="10">
+            </div>
+             <button id="save-settings-btn" class="cta-button">Save</button>
+        </div>
+    </div>
+</body>
+</html>
