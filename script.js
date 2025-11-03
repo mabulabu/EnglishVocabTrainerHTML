@@ -24,7 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
             correctCounts: {},
             roundHistory: [],
             wordsToPractice: {},
-            savedWords: {}, // For starred words
+            savedWords: {},
+            revealCountInBatch: 0, // Counter for auto-difficulty
+            justRevealed: false,     // Flag to count reveal only once per word
+            sliderTimeout: null,     // For debouncing slider input
         },
         assessment: {
             wordList: [],
@@ -150,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.toggle('active', body.classList.contains(`theme-${btn.dataset.theme}`));
         });
     }
-
+    
     function updatePracticeWordsDisplay() {
         const words = Object.keys(state.session.wordsToPractice);
         if (words.length > 0) {
@@ -214,6 +217,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         startPracticeBtn.addEventListener('click', startPracticeSession);
         startSavedBtn.addEventListener('click', startSavedSession);
+        
+        sidePanelSlider.addEventListener('input', () => {
+            const newDifficulty = parseInt(sidePanelSlider.value);
+            sidePanelDifficultyValue.textContent = newDifficulty;
+            clearTimeout(state.session.sliderTimeout);
+            state.session.sliderTimeout = setTimeout(() => {
+                updateDifficultyMidRound(newDifficulty);
+            }, 500);
+        });
 
         let isDragging = false, offset = { x: 0, y: 0 };
         modalHeader.addEventListener('mousedown', (e) => {
@@ -270,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.assessment.level = state.settings.manualDifficulty ? state.settings.difficulty : 50;
         state.assessment.currentIndex = 0;
         state.assessment.responses = [];
-        state.assessment.wordList = generateWordSublist(state.assessment.level, 70);
+        state.assessment.wordList = generateWordSublist(remapDifficulty(state.assessment.level), 70);
         showScreen('assessment-screen');
         renderAssessmentWord();
     }
@@ -315,7 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTraining(initialWords = []) {
         sidePanelSlider.value = state.settings.difficulty;
         sidePanelDifficultyValue.textContent = state.settings.difficulty;
-        let trainingList = generateWordSublist(state.settings.difficulty, state.settings.roundLength - initialWords.length);
+        state.session.revealCountInBatch = 0;
+        let trainingList = generateWordSublist(remapDifficulty(state.settings.difficulty), state.settings.roundLength - initialWords.length);
         state.session.wordList = [...initialWords, ...trainingList];
         state.session.wordList = state.session.wordList.filter(word => (state.session.correctCounts[word.word] || 0) < state.settings.autoRemoveCount);
         state.session.currentWordIndex = 0;
@@ -356,28 +369,33 @@ document.addEventListener('DOMContentLoaded', () => {
         trainingWordEl.className = 'fade-in';
         trainingDefEl.className = 'hidden';
         starIconEl.classList.toggle('hidden', !state.session.savedWords[word.word]);
+        state.session.justRevealed = false;
     }
 
     function handleTrainingSpacebar() {
-        if (trainingDefEl.classList.contains('hidden')) revealDefinition();
+        if (trainingDefEl.classList.contains('hidden')) toggleDefinition();
         else nextWord();
     }
 
     function toggleDefinition() {
         if (state.currentScreen !== 'training-screen') return;
         const isHidden = trainingDefEl.classList.toggle('hidden');
-        if (!isHidden) trainingDefEl.classList.add('fade-in');
-    }
-
-    function revealDefinition() {
-        if (trainingDefEl.classList.contains('hidden')) {
-            trainingDefEl.classList.remove('hidden');
+        if (!isHidden) {
             trainingDefEl.classList.add('fade-in');
+            if (!state.session.justRevealed) {
+                state.session.revealCountInBatch++;
+                state.session.justRevealed = true;
+            }
         }
     }
     
     function nextWord() {
         if (state.currentScreen !== 'training-screen' || state.session.currentWordIndex >= state.session.wordList.length - 1) return;
+        
+        if ((state.session.currentWordIndex + 1) % 10 === 0 && !state.settings.doAssessment) {
+            autoAdjustDifficulty();
+        }
+
         const currentWord = state.session.wordList[state.session.currentWordIndex];
         state.session.roundHistory[state.session.currentWordIndex] = { word: currentWord.word, definition: currentWord.definition, correct: true };
         state.session.currentWordIndex++;
@@ -403,25 +421,51 @@ document.addEventListener('DOMContentLoaded', () => {
         saveStateToLocalStorage();
         updateSavedWordsDisplay();
     }
+
+    function autoAdjustDifficulty() {
+        let difficultyChanged = false;
+        if (state.session.revealCountInBatch >= 7) {
+            state.settings.difficulty = Math.max(0, state.settings.difficulty - 5);
+            difficultyChanged = true;
+        } else if (state.session.revealCountInBatch <= 2) {
+            state.settings.difficulty = Math.min(100, state.settings.difficulty + 3);
+            difficultyChanged = true;
+        }
+        state.session.revealCountInBatch = 0;
+        if (difficultyChanged) {
+            sidePanelSlider.value = state.settings.difficulty;
+            sidePanelDifficultyValue.textContent = state.settings.difficulty;
+            updateDifficultyMidRound(state.settings.difficulty);
+            console.log(`Auto-adjusted difficulty to: ${state.settings.difficulty}`);
+        }
+    }
+
+    function updateDifficultyMidRound(newDifficulty) {
+        console.log(`Difficulty slider changed to: ${newDifficulty}`);
+        state.settings.difficulty = newDifficulty;
+        const wordsAlreadySeen = state.session.wordList.slice(0, state.session.currentWordIndex + 1);
+        const remainingWordCount = state.settings.roundLength - wordsAlreadySeen.length;
+        if (remainingWordCount > 0) {
+            const newWords = generateWordSublist(remapDifficulty(newDifficulty), remainingWordCount);
+            state.session.wordList = [...wordsAlreadySeen, ...newWords];
+            console.log(`Regenerated ${newWords.length} upcoming words.`);
+        }
+    }
     
     // --- RESULTS LOGIC ---
     function showResults() {
-        const total = state.session.wordList.length; // Use full list length for accuracy
+        const total = state.session.wordList.length;
         const correct = state.session.roundHistory.filter(r => r && r.correct).length;
-        
         resultsTitleEl.textContent = `Round Complete!`;
         resultsSummaryEl.textContent = `You got ${correct} out of ${total} words correct.`;
-        
         resultsChartContainer.innerHTML = '';
         state.session.wordList.forEach((wordObj, index) => {
             const historyItem = state.session.roundHistory[index];
             const bar = document.createElement('div');
-            // Assume un-reviewed words are incorrect for the chart
             bar.className = `result-bar ${historyItem && historyItem.correct ? 'correct' : 'incorrect'}`;
             bar.title = wordObj.word;
             resultsChartContainer.appendChild(bar);
         });
-
         resultsWordListEl.innerHTML = '';
         state.session.wordList.forEach((wordObj, index) => {
             const historyItem = state.session.roundHistory[index];
@@ -432,21 +476,16 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsWordListEl.appendChild(li);
             if (!isCorrect) state.session.wordsToPractice[wordObj.word] = wordObj.definition;
         });
-        
         saveStateToLocalStorage();
         updatePracticeWordsDisplay();
         showScreen('results-screen');
     }
 
     function copyWrongWords() {
-        const wrongWords = state.session.wordList
-            .filter((wordObj, index) => {
+        const wrongWords = state.session.wordList.filter((wordObj, index) => {
                 const historyItem = state.session.roundHistory[index];
                 return !historyItem || !historyItem.correct;
-            })
-            .map(wordObj => wordObj.word)
-            .join('\n');
-            
+            }).map(wordObj => wordObj.word).join('\n');
         if (wrongWords) navigator.clipboard.writeText(wrongWords).then(() => alert('List of incorrect words copied to clipboard!'));
         else alert('No incorrect words to copy!');
     }
@@ -459,6 +498,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- HELPER FUNCTIONS ---
+    function remapDifficulty(difficultyPercent) {
+        const basePercentile = 90;
+        const targetRange = 10;
+        return basePercentile + (difficultyPercent / 100) * targetRange;
+    }
+
     function generateWordSublist(difficultyPercent, count) {
         if (count <= 0) return [];
         const totalWords = state.vocab.combined.length;

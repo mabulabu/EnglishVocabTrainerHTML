@@ -422,7 +422,7 @@ body.theme-mono .icon-button:hover {
     gap: 10px;
 }
 .slider-container input[type="range"] {
-    transform: none; /* Removed rotation */
+    transform: none;
     width: 100%;
 }
 
